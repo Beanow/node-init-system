@@ -1,0 +1,21 @@
+{
+  "name": "init-system",
+  "version": "0.1.0",
+  "description": "Declarative startup/shutdown for your Node.js apps.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node-dev --respawn src/index.js",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "fantasy-states": "^0.2.1",
+    "fluture": "^7.2.2",
+    "momi": "^0.7.0",
+    "tcomb": "^3.2.24"
+  },
+  "devDependencies": {
+    "eslint": "^4.10.0",
+    "eslint-config-warp": "^2.1.0",
+    "node-dev": "^3.1.3"
+  }
+}
