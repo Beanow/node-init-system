@@ -37,39 +37,51 @@ const createCache = () => {
  * 3. The Future returned by the action is forked.
  * 4. It's reject / resolve value is copied to all Futures the convergeMap returned.
  */
-exports.convergeMap = (keys, action) => {
+exports.convergeMap = keys => {
 	const remaining = new Set(keys);
 	const map = keys.reduce((acc, val) => Object.assign(acc, {[val]: null}), {});
 	const {cache, rejectCache, resolveCache} = createCache();
 
+	let action;
 	let completed = false;
 	const onSetCompleted = m => {
 		completed = true;
+		if(!action) {
+			throw new Error('Set completed but no action set');
+		}
 		action(m).fork(rejectCache, resolveCache);
 	};
 
-	return key => {
-		if(!remaining.has(key)) {
-			// For sake of clarity, determine if duplicate or unspecified.
-			if(map[key] !== undefined) {
-				throw new Error(`Duplicate source for "${key}".`);
-			} else {
-				throw new Error(`Unexpected source for "${key}".`);
+	return {
+		action: a => {
+			if(action) {
+				throw new Error('Action already set');
 			}
+			action = a;
+		},
+		converge: key => {
+			if(!remaining.has(key)) {
+				// For sake of clarity, determine if duplicate or unspecified.
+				if(map[key] !== undefined) {
+					throw new Error(`Duplicate source for "${key}".`);
+				} else {
+					throw new Error(`Unexpected source for "${key}".`);
+				}
+			}
+
+			return val => {
+				if(completed) {
+					throw new Error('Unexpected source, already converged.');
+				}
+				map[key] = val;
+				remaining.delete(key);
+
+				if(remaining.size === 0) {
+					onSetCompleted(map);
+				}
+
+				return cache;
+			};
 		}
-
-		return val => {
-			if(completed) {
-				throw new Error('Unexpected source, already converged.');
-			}
-			map[key] = val;
-			remaining.delete(key);
-
-			if(remaining.size === 0) {
-				onSetCompleted(map);
-			}
-
-			return cache;
-		};
 	};
 };
