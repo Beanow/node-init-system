@@ -27,9 +27,9 @@ const createCache = () => {
  * Creates a converge map based on a given set of keys and an action.
  * Arguments:
  * - keys: String[]
- * - action: map => Future a b
  * Returns:
- *   key => value => Future a b
+ * - action: map => Future a b
+ * - converge: key => value => Future a b
  *
  * The flow of a convergeMap is:
  * 1. Every key in the set receives a value.

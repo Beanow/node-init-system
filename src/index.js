@@ -10,7 +10,7 @@ exports.glob = _ => require('../test');
 exports.services = (modules, callback) => {
 	Future.of(modules)
 	.map(validateModules)
-	.map(createDAG)
+	.chain(createDAG)
 	.chain(runDAG)
 	.done(callback);
 };
