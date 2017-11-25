@@ -1,65 +1,37 @@
 'use strict';
 
 const Future = require('fluture');
-const {Middleware} = require('momi');
-const {convergeGroup} = require('./future');
+const {convergeMap} = require('./future');
 
-const parallel = (max, reduceReturn, wares, convergeCount) =>
-	Middleware(convergeGroup(convergeCount, (inputs, resolve) => {
-		const state = inputs.reduce((acc, val) => Object.assign(acc, val), {});
-		return Future.parallel(max, wares.map(w => w.run(state)))
-		.map(ts => resolve({
-			_1: reduceReturn(ts.map(t => t._1)),
-			_2: null
-		}));
-	}));
+const bitwiseExitCodes = rets => rets.reduce((acc, val) => acc | val, 0);
 
-const simpleOutputReducer = rets => rets[0] + 1;
+const buildProvide = (newServices, numAfters, next, reducer) => currentServices => {
+	const serviceNames = newServices.map(s => s.provides);
+	const converge = convergeMap(serviceNames, next);
 
-const drainService = (spec, next) =>
-	Middleware.get
-	.chain(services => {
-		let hasProvided = false;
-		const provide = impl => {
-			hasProvided = true;
-			return impl;
-		};
-
-		const gen = spec.service(services, provide);
-
-		const preDrain = x => {
-			const itt = gen.next(x);
-			return hasProvided ? Future.of(itt.value) : itt.value.chain(preDrain);
-		};
-
-		const postDrain = x => {
-			const itt = gen.next(x);
-			return itt.done ? Future.of(itt.value) : itt.value.chain(postDrain);
-		};
-
-		return Middleware.lift(preDrain())
-		.chain(service => Middleware.put(Object.assign({}, services, {[spec.provides]: service})))
-		.chain(_ => next)
-		.chain(result => Middleware.lift(postDrain(result)));
-	});
+	return Future.parallel(
+		Infinity,
+		newServices.map(s =>
+			Future.do(() => s.service(
+				currentServices,
+				converge(s.provides)
+			))
+		)
+	)
+	.map(reducer);
+};
 
 exports.runDAG = table => {
-	const order = table.reverse();
-	let next = Middleware.of(0);
-	for(let i = 0; i < order.length; i++) {
-		next = parallel(
-			// Go fast or go home!
-			Infinity,
+	let provide = _ => Future.reject(new Error('No terminating service'));
 
-			// How to handle multiple return values (like exit codes).
-			simpleOutputReducer,
-
-			// What to do with each service.
-			order[i].map(node => drainService(node.value, next)),
-
-			// Peek ahead to know the converge size.
-			(order[i + 1] || []).length
+	for(let i = table.length - 1; i >= 0; i--) {
+		provide = buildProvide(
+			table[i].map(n => n.value),
+			i > 0 ? table[i - 1].length : 0,
+			provide,
+			bitwiseExitCodes
 		);
 	}
-	return next.evalState({});
+
+	return provide({});
 };
