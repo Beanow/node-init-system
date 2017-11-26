@@ -323,6 +323,28 @@ describe('blackbox', _ => {
 				}
 			);
 		});
+
+		it('resolves a real-world scenario in the correct order', done => {
+			const services = [
+				spec(provideAfter(20), 'Config'),
+				spec(provideAfter(20), 'Redis', 'Config'),
+				spec(provideAfter(20), 'Mongo', 'Config'),
+				spec(provideAfter(20), 'MongoOplog', 'Mongo Config'),
+				spec(provideAfter(20), 'Http', 'Mongo MongoOplog Redis'),
+				spec(provideAfter(20), 'Websockets', 'Redis Config'),
+				spec(terminateAfter(5, 0), 'Signals', 'Http Websockets')
+			];
+
+			init.services(
+				services,
+				options,
+				(err, result) => {
+					expect(err).to.equal(null);
+					expect(result).to.equal(0);
+					done();
+				}
+			);
+		});
 	});
 
 });
