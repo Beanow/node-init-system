@@ -2,7 +2,19 @@
   "name": "init-system",
   "version": "0.1.0",
   "description": "Declarative startup/shutdown for your Node.js apps.",
+  "author": "Robin van Boven (https://github.com/Beanow)",
   "license": "MIT",
+  "keywords": [
+    "init",
+    "systemd",
+    "init.d",
+    "bootstrap",
+    "startup",
+    "shutdown",
+    "async",
+    "middleware",
+    "dependency"
+  ],
   "scripts": {
     "dev": "node-dev --respawn src/index.js",
     "lint": "eslint src test",

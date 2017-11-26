@@ -2,10 +2,10 @@
 
 const t = require('tcomb');
 
-const Module = exports.Module = t.struct({
+const Service = exports.Service = t.struct({
 	provides: t.String,
 	after: t.maybe(t.list(t.String)),
 	service: t.Function
-}, 'Module');
+}, 'Service');
 
-exports.Modules = t.list(Module);
+exports.Services = t.list(Service);

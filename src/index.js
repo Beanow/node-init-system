@@ -1,7 +1,7 @@
 'use strict';
 
 const Future = require('fluture');
-const {Modules: validateModules} = require('./models');
+const {Services: validateServices} = require('./models');
 const {createDAG} = require('./dag');
 const {runDAG} = require('./run');
 
@@ -22,7 +22,7 @@ exports.services = (modules, opts, cb) => {
 	}
 
 	Future.of(modules)
-	.map(validateModules)
+	.map(validateServices)
 	.chain(createDAG(options))
 	.chain(runDAG(options))
 	.done(callback);
