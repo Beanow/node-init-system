@@ -1,6 +1,6 @@
 {
   "name": "init-system",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Declarative startup/shutdown for your Node.js apps.",
   "author": "Robin van Boven (https://github.com/Beanow)",
   "license": "MIT",
