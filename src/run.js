@@ -5,7 +5,7 @@ const {convergeMap} = require('./future');
 
 const bitwiseExitCodes = rets => rets.reduce((acc, val) => acc | val, 0);
 
-const encaseDo = function*(itt) {
+const encaseDo = exports.encaseDo = function*(itt) {
 	let state, x;
 	do {
 		try{
@@ -55,7 +55,7 @@ exports.runDAG = options => dag => {
 		const v = dag.get(key);
 		const ns = Object.values(nexts[key]);
 		if(!ns) {
-			throw new Error(`Missing nexts for ${key}`);
+			throw new Error(`Implementation error in runDAG, missing nexts for ${key}`);
 		}
 		if(!cms[key]) {
 			cms[key] = convergeMap(v.after);
