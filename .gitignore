@@ -1,3 +1,4 @@
 node_modules
 .nyc*
 package-lock.json
+imgs
