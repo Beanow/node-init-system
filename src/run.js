@@ -3,6 +3,8 @@
 const Future = require('fluture');
 const {convergeMap} = require('./future');
 
+const maxParallels = Infinity;
+
 const bitwiseExitCodes = rets => rets.reduce((acc, val) => acc | val, 0);
 
 const encaseDo = exports.encaseDo = function*(itt) {
@@ -28,14 +30,10 @@ const makeServiceAction = (spec, nexts, reducer, logger) => services =>
 		return encaseDo(spec.service(
 			services,
 			impl => Future.parallel(
-				Infinity,
+				maxParallels,
 				nexts.map(n => n(impl))
 			)
-			.map(rets => {
-				const ret = reducer(rets);
-				logger(`Service '${spec.provides}' received return value (${ret})`);
-				return ret;
-			})
+			.map(reducer)
 		));
 	})
 	.map(ret => {
@@ -45,7 +43,7 @@ const makeServiceAction = (spec, nexts, reducer, logger) => services =>
 
 exports.runDAG = options => dag => {
 	options.logger('Creating execution order from DAG');
-	let starter;
+	const starters = {};
 	const cms = {};
 	const nexts = {};
 	nexts[dag.root] = [_ => Future.reject(new Error('No terminating service defined'))];
@@ -72,17 +70,23 @@ exports.runDAG = options => dag => {
 			dfw(e);
 		}
 
-		if (ns.length >= v.before.length) {
+		if (ns.length === v.before.length || (v.before.length === 0 && ns.length === 1)) {
 			const action = makeServiceAction(v, ns, bitwiseExitCodes, options.logger);
-			if(v.after.length === 0) {
-				starter = action;
+			if(!cms[key].hasAction()) {
+				cms[key].setAction(action);
+				if(v.after.length === 0) {
+					starters[key] = action;
+				}
 			}
-			cms[key].action(action);
 		}
 	};
 
 	dfw(dag.root);
 
 	options.logger('Execution order created from DAG');
-	return starter({});
+	return Future.parallel(
+		maxParallels,
+		Object.keys(starters).map(s => starters[s]({}))
+	)
+	.map(bitwiseExitCodes);
 };

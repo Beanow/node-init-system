@@ -61,11 +61,14 @@ exports.convergeMap = keys => {
 		if(!action) {
 			throw new Error('Set completed but no action set');
 		}
+
+		// TODO: find a nice way to make this lazy, not eager.
 		action(m).fork(rejectCache, resolveCache);
 	};
 
 	return {
-		action: a => {
+		hasAction: _ => action !== undefined,
+		setAction: a => {
 			if(action) {
 				throw new Error('Action already set');
 			}
