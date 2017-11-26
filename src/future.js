@@ -78,15 +78,15 @@ exports.convergeMap = keys => {
 			if(!remaining.has(key)) {
 				// For sake of clarity, determine if duplicate or unspecified.
 				if(map[key] !== undefined) {
-					throw new Error(`Duplicate source for "${key}".`);
+					throw new Error(`Duplicate source for "${key}"`);
 				} else {
-					throw new Error(`Unexpected source for "${key}".`);
+					throw new Error(`Unexpected source for "${key}"`);
 				}
 			}
 
 			return val => {
 				if(completed) {
-					throw new Error('Unexpected source, already converged.');
+					throw new Error(`Unexpected value for "${key}", already converged`);
 				}
 				map[key] = val;
 				remaining.delete(key);

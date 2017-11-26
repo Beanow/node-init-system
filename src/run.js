@@ -21,6 +21,7 @@ const encaseDo = exports.encaseDo = function*(itt) {
 			yield Future.reject(e);
 		}
 	} while(!state.done);
+	/* istanbul ignore next */
 	throw new Error('Implementation error in encaseDo, should return before end');
 };
 
@@ -52,6 +53,8 @@ exports.runDAG = options => dag => {
 	const dfw = key => {
 		const v = dag.get(key);
 		const ns = Object.values(nexts[key]);
+
+		/* istanbul ignore if */
 		if(!ns) {
 			throw new Error(`Implementation error in runDAG, missing nexts for ${key}`);
 		}

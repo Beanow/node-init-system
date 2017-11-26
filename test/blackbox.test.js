@@ -2,7 +2,8 @@
 
 const {expect} = require('chai');
 const init = require('../src');
-const {spec, provideSync, provideAfter, terminateSync, terminateAfter} = require('./services.mock');
+const {spec, provideSync, provideAfter, provideAfterThenError,
+	terminateSync, terminateAfter, errorAfter} = require('./services.mock');
 
 describe('blackbox', _ => {
 	const options = {
@@ -56,6 +57,44 @@ describe('blackbox', _ => {
 				(err, result) => {
 					expect(err).to.equal(null);
 					expect(result).to.equal(456);
+					done();
+				}
+			);
+		});
+
+		it('rejects a service throwing an error during startup', done => {
+			const err = 'mock-error';
+			const services = [
+				spec(provideAfter(15), 'A'),
+				spec(provideAfter(10), 'B', 'A'),
+				spec(errorAfter(5, err), 'C', 'B')
+			];
+
+			init.services(
+				services,
+				options,
+				(err, result) => {
+					expect(err).to.equal(err);
+					expect(result).to.be.undefined;
+					done();
+				}
+			);
+		});
+
+		it('rejects a service throwing an error during shutdown', done => {
+			const err = 'mock-error';
+			const services = [
+				spec(provideAfter(15), 'A'),
+				spec(provideAfterThenError(10, err), 'B', 'A'),
+				spec(terminateAfter(5, 404), 'C', 'B')
+			];
+
+			init.services(
+				services,
+				options,
+				(err, result) => {
+					expect(err).to.equal(err);
+					expect(result).to.be.undefined;
 					done();
 				}
 			);

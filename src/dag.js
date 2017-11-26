@@ -118,16 +118,13 @@ exports.createDAG = options => services => {
 	}
 
 	// Find the root service.
-	const roots = Object.keys(vertexes).filter(v => (vertexes[v].before || []).length === 0);
+	const roots = Object.keys(vertexes).filter(v => vertexes[v].before.length === 0);
 	if(roots.length !== 1) {
 		return Future.reject(new Error(`Must have exactly 1 root, actually: ${roots}`));
 	}
 
-	// Find the source service(s).
-	const sources = Object.keys(vertexes).filter(v => (vertexes[v].after || []).length === 0);
-	if(sources.length < 1) {
-		return Future.reject(new Error(`Must have at least 1 source, actually: ${sources}`));
-	}
+	// Find the source service(s), will be at least one, otherwise we'd have found cycles.
+	const sources = Object.keys(vertexes).filter(v => vertexes[v].after.length === 0);
 
 	// Share our DAG.
 	options.logger('Valid DAG created from service specifications');

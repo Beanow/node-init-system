@@ -26,7 +26,7 @@ const afterErrGen = (after, err) => {
 
 describe('run', _ => {
 
-	describe('encaseDO', _ => {
+	describe('.encaseDo', _ => {
 		it('can chain sync', done => {
 			Future.do(_ => encaseDo(syncGen(123)))
 			.chain(val => {

@@ -12,6 +12,21 @@ const checkDeps = (deps, services) => {
 	}
 };
 
+exports.errorAfter = (after, err) => (name, deps) =>
+	function*(services) {
+		checkDeps(deps, services);
+		throw yield Future.after(after, err);
+	};
+
+exports.provideAfterThenError = (after, err) => (name, deps) =>
+	function*(services, provide) {
+		checkDeps(deps, services);
+		const impl = service(name);
+		const svc = yield Future.after(after, impl);
+		yield provide(svc);
+		throw err;
+	};
+
 exports.provideAfter = after => (name, deps) =>
 	function*(services, provide) {
 		checkDeps(deps, services);
@@ -44,10 +59,10 @@ exports.terminateSync = val => (_, deps) =>
 	};
 
 exports.spec = (type, name, afterStr) => {
-	const after = (afterStr || '').split(/[,\s]/).map(s => s.trim()).filter(s => s.length > 0);
+	const after = afterStr ? afterStr.split(/[,\s]/).filter(s => s.length > 0) : undefined;
 	return {
 		provides: name,
 		after,
-		service: type(name, after)
+		service: type(name, after || [])
 	};
 };
