@@ -85,7 +85,8 @@ const scanDependencies = vertexes => {
 	return {unknowns, selfDependent};
 };
 
-exports.createDAG = services => {
+exports.createDAG = options => services => {
+	options.logger('Creating DAG from service specifications');
 	const vertexes = toVertexMap(services);
 	const {unknowns, selfDependent} = scanDependencies(vertexes);
 
@@ -98,8 +99,9 @@ exports.createDAG = services => {
 
 	// Self dependendent fails early.
 	if(selfDependent.length) {
-		const pluralize = selfDependent.length === 1 ? 'Service has' : 'Services having';
-		return Future.reject(new Error(`${pluralize} a dependency to itself: ${selfDependent}`));
+		const plA = selfDependent.length === 1 ? 'Service has' : 'Services having';
+		const plB = selfDependent.length === 1 ? 'itself' : 'themselves';
+		return Future.reject(new Error(`${plA} a dependency to ${plB}: ${selfDependent}`));
 	}
 
 	// Find cycles between services.
@@ -128,6 +130,7 @@ exports.createDAG = services => {
 	}
 
 	// Share our DAG.
+	options.logger('Valid DAG created from service specifications');
 	return Future.of({
 		sources,
 		vertexes,

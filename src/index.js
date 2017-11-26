@@ -5,25 +5,25 @@ const {Modules: validateModules} = require('./models');
 const {createDAG} = require('./dag');
 const {runDAG} = require('./run');
 
-exports.glob = _ => require('../test');
-
-exports.services = (modules, callback) => {
-	Future.of(modules)
-	.map(validateModules)
-	.chain(createDAG)
-	.chain(runDAG)
-	.done(callback);
+const defaultOpts = {
+	logger: _ => {}
 };
 
-// Who needs a test framework?
-exports.services(
-	exports.glob('this is fake'),
-	(err, result) => {
-		if(err) {
-			console.log(`Something bad! ${err.stack || err}`);
-		} else {
-			console.log(`Application exitted with ${result}`);
-			console.log('--------');
-		}
+// exports.glob = _ => require('../test');
+
+exports.services = (modules, opts, cb) => {
+	let options, callback;
+	if(cb) {
+		options = Object.assign({}, {...defaultOpts, ...opts});
+		callback = cb;
+	} else {
+		options = Object.assign({}, defaultOpts);
+		callback = opts;
 	}
-);
+
+	Future.of(modules)
+	.map(validateModules)
+	.chain(createDAG(options))
+	.chain(runDAG(options))
+	.done(callback);
+};

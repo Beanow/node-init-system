@@ -22,17 +22,29 @@ const encaseDo = function*(itt) {
 	throw new Error('Implementation error in encaseDo, should return before end');
 };
 
-const makeServiceAction = (spec, nexts, reducer) => services =>
-	Future.do(() => encaseDo(spec.service(
-		services,
-		impl => Future.parallel(
-			Infinity,
-			nexts.map(n => n(impl))
-		)
-		.map(reducer)
-	)));
+const makeServiceAction = (spec, nexts, reducer, logger) => services =>
+	Future.do(() => {
+		logger(`Starting service '${spec.provides}' with [${Object.keys(services).join(', ')}]`);
+		return encaseDo(spec.service(
+			services,
+			impl => Future.parallel(
+				Infinity,
+				nexts.map(n => n(impl))
+			)
+			.map(rets => {
+				const ret = reducer(rets);
+				logger(`Service '${spec.provides}' received return value (${ret})`);
+				return ret;
+			})
+		));
+	})
+	.map(ret => {
+		logger(`Stopped service '${spec.provides}' with exit code (${ret})`);
+		return ret;
+	});
 
-exports.runDAG = dag => {
+exports.runDAG = options => dag => {
+	options.logger('Creating execution order from DAG');
 	let starter;
 	const cms = {};
 	const nexts = {};
@@ -61,7 +73,7 @@ exports.runDAG = dag => {
 		}
 
 		if (ns.length >= v.before.length) {
-			const action = makeServiceAction(v, ns, bitwiseExitCodes);
+			const action = makeServiceAction(v, ns, bitwiseExitCodes, options.logger);
 			if(v.after.length === 0) {
 				starter = action;
 			}
@@ -71,5 +83,6 @@ exports.runDAG = dag => {
 
 	dfw(dag.root);
 
+	options.logger('Execution order created from DAG');
 	return starter({});
 };
