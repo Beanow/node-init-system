@@ -4,23 +4,35 @@ const Future = require('fluture');
 
 // Unfortunate blerg to deal with sync vs async situations.
 const createCache = () => {
-	let cacheResolve, cacheResolveValue, cacheReject, cacheRejectValue;
-	const resolveCache = v => cacheResolve ? cacheResolve(v) || v : cacheResolveValue = v;
-	const rejectCache = v => cacheReject ? cacheReject(v) || v : cacheRejectValue = v;
-	const cache = Future.cache(Future((reject, resolve) => {
-		if(cacheResolveValue || cacheRejectValue) {
-			if(cacheRejectValue) {
-				reject(cacheRejectValue);
-			} else {
-				resolve(cacheResolveValue);
-			}
-		}
+	const fns = {};
+	let syncOp = null;
+	let syncVal;
 
-		cacheReject = reject;
-		cacheResolve = resolve;
+	const set = op => v => {
+		syncOp = op;
+		fns[op] ? fns[op](v) : syncVal = v;
+	};
+
+	const cache = Future.cache(Future((reject, resolve) => {
+		switch(syncOp) {
+		case 'reject':
+			reject(syncVal);
+			break;
+		case 'resolve':
+			resolve(syncVal);
+			break;
+		default:
+			fns.reject = reject;
+			fns.resolve = resolve;
+			break;
+		}
 	}));
 
-	return {cache, rejectCache, resolveCache};
+	return {
+		cache,
+		rejectCache: set('reject'),
+		resolveCache: set('resolve')
+	};
 };
 
 /**
