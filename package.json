@@ -1,8 +1,13 @@
 {
   "name": "init-system",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Declarative startup/shutdown for your Node.js apps.",
   "author": "Robin van Boven (https://github.com/Beanow)",
+  "repository": "https://github.com/Beanow/node-init-system.git",
+  "homepage": "https://github.com/Beanow/node-init-system",
+  "bugs": {
+    "url": "https://github.com/Beanow/node-init-system/issues"
+  },
   "license": "MIT",
   "keywords": [
     "init",
