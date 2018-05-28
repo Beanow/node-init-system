@@ -1,5 +1,10 @@
 # init-system
 
+[![NPM Version](https://badge.fury.io/js/init-system.svg)](https://www.npmjs.com/package/init-system)
+[![Dependencies](https://david-dm.org/Beanow/node-init-system.svg)](https://david-dm.org/Beanow/node-init-system)
+[![Build Status](https://travis-ci.org/Beanow/node-init-system.svg?branch=master)](https://travis-ci.org/Beanow/node-init-system)
+[![Code Coverage](https://codecov.io/gh/Beanow/node-init-system/branch/master/graph/badge.svg)](https://codecov.io/gh/Beanow/node-init-system)
+
 Declarative startup/shutdown for your Node.js apps.
 
 This solution has a dependency declarations similar to Linux startup systems or Makefiles.

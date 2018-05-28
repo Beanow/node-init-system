@@ -1,0 +1,8 @@
+node_modules
+.nyc*
+package-lock.json
+imgs
+test
+.editorconfig
+.eslintrc.json
+.travis.yml
