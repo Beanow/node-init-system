@@ -4,4 +4,8 @@ node_js:
   - 8
   - 9
   - 10
+env:
+  - FLUTURE_VERSION=^7.2.0
+  - FLUTURE_VERSION=^8.0.0
+before_script: npm i fluture@$FLUTURE_VERSION
 after_success: npm run test:coverage
