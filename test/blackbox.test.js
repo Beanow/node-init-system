@@ -73,8 +73,8 @@ describe('blackbox', _ => {
 			init.services(
 				services,
 				options,
-				(err, result) => {
-					expect(err).to.equal(err);
+				(e, result) => {
+					expect(e).to.equal(err);
 					expect(result).to.be.undefined;
 					done();
 				}
@@ -92,8 +92,8 @@ describe('blackbox', _ => {
 			init.services(
 				services,
 				options,
-				(err, result) => {
-					expect(err).to.equal(err);
+				(e, result) => {
+					expect(e).to.equal(err);
 					expect(result).to.be.undefined;
 					done();
 				}
