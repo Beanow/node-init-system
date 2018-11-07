@@ -31,7 +31,7 @@
     "node": ">=8.3.0"
   },
   "dependencies": {
-    "tcomb": "^3.2.27"
+    "tcomb": "3.2.27"
   },
   "peerDependencies": {
     "fluture": "^7.2.0 || ^8.0.0"
