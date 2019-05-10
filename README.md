@@ -10,6 +10,14 @@ Declarative startup/shutdown for your Node.js apps.
 This solution has a dependency declarations similar to Linux startup systems or Makefiles.
 It also has inversion of control similar to middleware.
 
+## Project status
+
+**Unmaintained**
+
+This module saw sucessful deployments into production for projects I worked on,
+but we eventually decided to move to [booture](https://github.com/fluture-js/booture).
+The functionality and syntax are similar, but it offers cleaner integration into Fluture and well defined behaviour since it's based on Fluture Hooks.
+
 ## Usage
 
 First we need to declare our services.
